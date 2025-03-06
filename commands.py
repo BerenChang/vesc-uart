@@ -22,6 +22,9 @@ class Commands:
 
             if command == "COMM_GET_VALUES":
                 result = self.COMM_GET_VALUES(uart, controller_id)
+
+            if command == "COMM_GET_VALUES_SETUP":
+                result = self.COMM_GET_VALUES_SETUP(uart, controller_id)
         
             if command == "COMM_FW_VERSION":
                 result = self.COMM_FW_VERSION(uart, controller_id)
@@ -98,7 +101,7 @@ class Commands:
         return dec
 
     def COMM_GET_VALUES_SETUP(self, uart: UART, controller_id: int = -1) -> dict:
-        uart.send_command(datatypes.COMM_Types.COMM_GET_VALUES, controller_id=controller_id)
+        uart.send_command(datatypes.COMM_Types.COMM_GET_VALUES_SETUP, controller_id=controller_id)
         result = uart.receive_packet()
 
         dec = dict() ; i = 0
