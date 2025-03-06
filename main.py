@@ -51,7 +51,8 @@ while 1:
 
     #f = s.COMM_GET_MCCONF(uart, -1, {"need_bin": True})
     # f = s.COMM_PING_CAN(uart)
-    f = s.COMM_GET_VALUES(uart)
+    # f = s.COMM_GET_VALUES(uart)
+    f = s.COMM_GET_VALUES_SETUP(uart) 
     print(f)
     #b = base64.b64decode(f.get("not_parsed_data"))
 
