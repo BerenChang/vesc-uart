@@ -35,7 +35,7 @@ exit(0)
 ##########
 
 uart = uart.UART(debug=True)
-uart.connect("192.168.015.051:65102", 115200)
+uart.connect("port:///dev/ttyACM0?speed=115200", 115200)
 print("started")
 
 #time.sleep(15)
@@ -50,7 +50,8 @@ while 1:
     #res4 = s.COMM_SET_CURRENT_BRAKE(uart, {"current": 20}, 8)
 
     #f = s.COMM_GET_MCCONF(uart, -1, {"need_bin": True})
-    f = s.COMM_PING_CAN(uart)
+    # f = s.COMM_PING_CAN(uart)
+    f = s.COMM_GET_VALUES(uart)
     print(f)
     #b = base64.b64decode(f.get("not_parsed_data"))
 
