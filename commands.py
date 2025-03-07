@@ -25,6 +25,9 @@ class Commands:
 
             if command == "COMM_GET_VALUES_SETUP":
                 result = self.COMM_GET_VALUES_SETUP(uart, controller_id)
+
+            if command == "COMM_GET_VALUES_PIDISPLAY":
+                result = self.COMM_GET_VALUES_PIDISPLAY(uart, controller_id)
         
             if command == "COMM_FW_VERSION":
                 result = self.COMM_FW_VERSION(uart, controller_id)
@@ -137,6 +140,53 @@ class Commands:
 
         dec["wh_batt_left"] = float_from_bytes(result.data[i : i+4], 1e3)       ; i+=4
         dec["odometer"] = float_from_bytes(result.data[i : i+4], 1e3)           ; i+=4
+
+        return dec
+    
+    def COMM_GET_VALUES_PIDISPLAY(self, uart: UART, controller_id: int = -1) -> dict:
+        uart.send_command(datatypes.COMM_Types.COMM_GET_VALUES_PIDISPLAY, controller_id=controller_id)
+        result = uart.receive_packet()
+
+        dec = dict() ; i = 0
+        dec["temp_fet_filtered"] = float_from_bytes(result.data[i : i+2])           ; i+=2
+        dec["temp_motor_filtered"] = float_from_bytes(result.data[i : i+2])         ; i+=2
+
+        dec["avg_motor_current"] = float_from_bytes(result.data[i : i+4], 1e2, True); i+=4
+        dec["avg_input_current"] = float_from_bytes(result.data[i : i+4], 1e2, True); i+=4
+        dec["avg_id"] = float_from_bytes(result.data[i : i+4], 1e2)                 ; i+=4
+        dec["avg_iq"] = float_from_bytes(result.data[i : i+4], 1e2, True)           ; i+=4
+
+        dec["duty_cycle"] = float_from_bytes(result.data[i : i+2], 1e3)         ; i+=2
+        dec["rpm"] = float_from_bytes(result.data[i : i+4], 1e0, True)          ; i+=4
+        dec["voltage"] = float_from_bytes(result.data[i : i+2], 1e1)            ; i+=2
+
+        dec["amp_hours"] = float_from_bytes(result.data[i : i+4], 1e4)          ; i+=4
+        dec["amp_hours_charged"] = float_from_bytes(result.data[i : i+4], 1e4)  ; i+=4
+
+        dec["watt_hours"] = float_from_bytes(result.data[i : i+4], 1e4)         ; i+=4
+        dec["watt_hours_charged"] = float_from_bytes(result.data[i : i+4], 1e4) ; i+=4
+
+        dec["tachometer"] = uint_from_bytes(result.data[i : i+4], True)         ; i+=4
+        dec["tachometer_abs"] = uint_from_bytes(result.data[i : i+4])           ; i+=4
+
+        dec["fault_code"] = result.data[i]                                      ; i+=1
+        dec["fault_code_desc"] = datatypes.FAULT_Codes(dec["fault_code"]).name
+
+        dec["pid_pos"] = float_from_bytes(result.data[i : i+4], 1e6)            ; i+=4
+
+        dec["controller_id"] = result.data[i]                                   ; i+=1
+
+        dec["temp_mos1"] = float_from_bytes(result.data[i : i+2], 1e1)          ; i+=2
+        dec["temp_mos2"] = float_from_bytes(result.data[i : i+2], 1e1)          ; i+=2
+        dec["temp_mos3"] = float_from_bytes(result.data[i : i+2], 1e1)          ; i+=2
+
+        dec["avg_vd"] = float_from_bytes(result.data[i : i+4], 1e3)             ; i+=4
+        dec["avg_vq"] = float_from_bytes(result.data[i : i+4], 1e3, True)       ; i+=4
+
+        dec["battery_level"] = float_from_bytes(result.data[i : i+2], 1e3, True); i+=2
+        dec["distance"] = float_from_bytes(result.data[i : i+4], 1e3, True)     ; i+=4
+        dec["distance_abs"] = float_from_bytes(result.data[i : i+4], 1e3, True) ; i+=4
+        dec["odometer"] = float_from_bytes(result.data[i : i+4], 1e3, True)     ; i+=4
 
         return dec
 
