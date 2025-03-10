@@ -25,8 +25,8 @@ if sys.platform == "linux":
     signal.signal(signal.SIGINT, signal_exit)
     signal.signal(signal.SIGTERM, signal_exit)
 
-server.start_server("0.0.0.0", 2002) # blocking
-exit(0)
+# server.start_server("0.0.0.0", 2002) # blocking
+# exit(0)
 
 
 
@@ -52,8 +52,9 @@ while 1:
     #f = s.COMM_GET_MCCONF(uart, -1, {"need_bin": True})
     # f = s.COMM_PING_CAN(uart)
     # f = s.COMM_GET_VALUES(uart)
-    f = s.COMM_GET_VALUES_SETUP(uart) 
-    print(f)
+    # f = s.COMM_GET_VALUES_SETUP(uart) 
+    f = s.COMM_SET_ZERO_TURN(uart, {"zero_turn": 1}, -1)
+    # print(f)
     #b = base64.b64decode(f.get("not_parsed_data"))
 
     #res = s.COMM_REBOOT(uart, -1)

@@ -28,6 +28,9 @@ class Commands:
 
             if command == "COMM_GET_VALUES_PIDISPLAY":
                 result = self.COMM_GET_VALUES_PIDISPLAY(uart, controller_id)
+
+            if command == "COMM_SET_ZERO_TURN":
+                result = self.COMM_SET_ZERO_TURN(uart, controller_id)
         
             if command == "COMM_FW_VERSION":
                 result = self.COMM_FW_VERSION(uart, controller_id)
@@ -189,6 +192,12 @@ class Commands:
         dec["odometer"] = float_from_bytes(result.data[i : i+4], 1e3, True)     ; i+=4
 
         return dec
+    
+    def COMM_SET_ZERO_TURN(self, uart: UART, args: dict, controller_id: int = -1) -> None:
+        data = args["zero_turn"] # binary true or false
+        uart.send_command(datatypes.COMM_Types.COMM_SET_ZERO_TURN, controller_id=controller_id, data=data)
+
+        return None
 
     def COMM_FW_VERSION(self, uart: UART, controller_id: int = -1) -> dict:
         uart.send_command(datatypes.COMM_Types.COMM_FW_VERSION, controller_id=controller_id)
