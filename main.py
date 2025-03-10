@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 print("starting server")
 server = network.ApiServer()
 
-ZERO_TURN_SWITCH_PIN = 25
+ZERO_TURN_SWITCH_PIN = 21
 
 def signal_exit(signum, frame):
     print("stopping service by signal")
