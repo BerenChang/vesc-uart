@@ -194,7 +194,8 @@ class Commands:
         return dec
     
     def COMM_SET_ZERO_TURN(self, uart: UART, args: dict, controller_id: int = -1) -> None:
-        data = args["zero_turn"] # binary true or false
+        zero_turn = args["zero_turn"] # binary true or false
+        data = uint8_to_bytes(zero_turn)
         uart.send_command(datatypes.COMM_Types.COMM_SET_ZERO_TURN, controller_id=controller_id, data=data)
 
         return None

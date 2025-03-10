@@ -11,10 +11,13 @@ import datatypes
 import commands
 import network
 import sys
+import RPi.GPIO as GPIO
 
 
 print("starting server")
 server = network.ApiServer()
+
+ZERO_TURN_SWITCH_PIN = 17
 
 def signal_exit(signum, frame):
     print("stopping service by signal")
@@ -25,7 +28,7 @@ if sys.platform == "linux":
     signal.signal(signal.SIGINT, signal_exit)
     signal.signal(signal.SIGTERM, signal_exit)
 
-# server.start_server("0.0.0.0", 2002) # blocking
+server.start_server("0.0.0.0", 2002) # blocking
 # exit(0)
 
 
@@ -37,6 +40,9 @@ if sys.platform == "linux":
 uart = uart.UART(debug=True)
 uart.connect("port:///dev/ttyACM0?speed=115200", 115200)
 print("started")
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(ZERO_TURN_SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 #time.sleep(15)
 
@@ -52,7 +58,8 @@ while 1:
     #f = s.COMM_GET_MCCONF(uart, -1, {"need_bin": True})
     # f = s.COMM_PING_CAN(uart)
     # f = s.COMM_GET_VALUES(uart)
-    # f = s.COMM_GET_VALUES_SETUP(uart) 
+    # f = s.COMM_GET_VALUES_SETUP(uart)
+    
     f = s.COMM_SET_ZERO_TURN(uart, {"zero_turn": 1}, -1)
     # print(f)
     #b = base64.b64decode(f.get("not_parsed_data"))
