@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 print("starting server")
 server = network.ApiServer()
 
-ZERO_TURN_SWITCH_PIN = 17
+ZERO_TURN_SWITCH_PIN = 25
 
 def signal_exit(signum, frame):
     print("stopping service by signal")
@@ -59,8 +59,16 @@ while 1:
     # f = s.COMM_PING_CAN(uart)
     # f = s.COMM_GET_VALUES(uart)
     # f = s.COMM_GET_VALUES_SETUP(uart)
+
+    switch_state = GPIO.input(ZERO_TURN_SWITCH_PIN)
+
+    # Determine the switch status
+    if switch_state == GPIO.LOW:
+        f = s.COMM_SET_ZERO_TURN(uart, {"zero_turn": 0}, -1)
+    else:
+        f = s.COMM_SET_ZERO_TURN(uart, {"zero_turn": 1}, -1)
     
-    f = s.COMM_SET_ZERO_TURN(uart, {"zero_turn": 1}, -1)
+    # f = s.COMM_SET_ZERO_TURN(uart, {"zero_turn": 1}, -1)
     # print(f)
     #b = base64.b64decode(f.get("not_parsed_data"))
 
