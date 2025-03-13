@@ -6,6 +6,10 @@ import conv
 import datatypes
 from uart import UART
 from conv import *
+import RPi.GPIO as GPIO
+
+ZERO_TURN_SWITCH_PIN = 21
+zero_turn_switch_before = GPIO.input(ZERO_TURN_SWITCH_PIN)
 
 class Commands:
     LOCAL_ID = "LOCAL_ID"
@@ -21,6 +25,13 @@ class Commands:
                 result = {"id": self.get_local_controller_id(uart)}
 
             if command == "COMM_GET_VALUES":
+                zero_turn_switch_after = GPIO.input(ZERO_TURN_SWITCH_PIN)
+                if zero_turn_switch_after is not zero_turn_switch_before:
+                    if zero_turn_switch_after == GPIO.LOW:
+                        self.COMM_SET_ZERO_TURN(uart, {"zero_turn": 0}, controller_id)
+                    else:
+                        self.COMM_SET_ZERO_TURN(uart, {"zero_turn": 1}, controller_id)
+                    zero_turn_switch_before = zero_turn_switch_after
                 result = self.COMM_GET_VALUES(uart, controller_id)
 
             if command == "COMM_GET_VALUES_SETUP":

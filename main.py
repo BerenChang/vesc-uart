@@ -29,7 +29,7 @@ if sys.platform == "linux":
     signal.signal(signal.SIGTERM, signal_exit)
 
 server.start_server("0.0.0.0", 2002) # blocking
-# exit(0)
+exit(0)
 
 
 
