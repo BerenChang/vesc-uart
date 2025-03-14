@@ -94,14 +94,19 @@ class Commands:
         throttle = args["throttle"]
         board = args["board"]
         reverse_button = 0  # default: forward(0). Otherwise: backward(1)
+        steer_direction = 0  # default: left(0). Otherwise: right(1)
         if throttle < 0:
             reverse_button = 1
+        if board < 0:
+            steer_direction = 1
         throttle = abs(throttle)
+        board = abs(board)
         
         reverse_button_byte = uint8_to_bytes(reverse_button)
+        steer_direction_byte = uint8_to_bytes(steer_direction)
         throttle_byte = float32_to_bytes(throttle, 1e2)
         board_byte = float32_to_bytes(board, 1e2)
-        data = reverse_button_byte + throttle_byte + board_byte
+        data = reverse_button_byte + steer_direction_byte + throttle_byte + board_byte
         print(data)
 
         # uart.send_command(datatypes.COMM_Types.COMM_SET_ZERO_TURN, controller_id=controller_id, data=data)
