@@ -7,14 +7,22 @@ import datatypes
 from uart import UART
 from conv import *
 import RPi.GPIO as GPIO
+import XboxController
 
-ZERO_TURN_SWITCH_PIN = 21
-zero_turn_switch_before = GPIO.input(ZERO_TURN_SWITCH_PIN)
+# ZERO_TURN_SWITCH_PIN = 21
+# zero_turn_switch_before = GPIO.input(ZERO_TURN_SWITCH_PIN)
 
 class Commands:
     LOCAL_ID = "LOCAL_ID"
 
     stats = {"success": 0, "fail_timeout": 0, "fail_crc": 0, "failed_other": 0}
+
+    def __init__(self):
+        self.ZERO_TURN_SWITCH_PIN = 21
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.ZERO_TURN_SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        self.zero_turn_switch_before = GPIO.input(self.ZERO_TURN_SWITCH_PIN)
+        self.joy = XboxController()
 
     # noinspection PyTypeChecker
     def perform_command(self, uart: UART, command: str, controller_id: int = -1, args: dict = None) -> dict:
@@ -25,13 +33,20 @@ class Commands:
                 result = {"id": self.get_local_controller_id(uart)}
 
             if command == "COMM_GET_VALUES":
-                zero_turn_switch_after = GPIO.input(ZERO_TURN_SWITCH_PIN)
-                if zero_turn_switch_after is not zero_turn_switch_before:
-                    if zero_turn_switch_after == GPIO.LOW:
+
+                # zero turn switch
+                zero_turn_switch_after = GPIO.input(self.ZERO_TURN_SWITCH_PIN)
+                if zero_turn_switch_after is not self.zero_turn_switch_before:
+                    if zero_turn_switch_after == GPIO.HIGH:
                         self.COMM_SET_ZERO_TURN(uart, {"zero_turn": 0}, controller_id)
                     else:
                         self.COMM_SET_ZERO_TURN(uart, {"zero_turn": 1}, controller_id)
-                    zero_turn_switch_before = zero_turn_switch_after
+                    self.zero_turn_switch_before = zero_turn_switch_after
+
+                # Joystick RC
+                [throttle, board] = self.joy.read()
+                self.COMM_SET_REMOTE_CONTROL(uart, {"throttle": throttle, "board": board}, controller_id)
+
                 result = self.COMM_GET_VALUES(uart, controller_id)
 
             if command == "COMM_GET_VALUES_SETUP":
@@ -40,8 +55,8 @@ class Commands:
             if command == "COMM_GET_VALUES_PIDISPLAY":
                 result = self.COMM_GET_VALUES_PIDISPLAY(uart, controller_id)
 
-            if command == "COMM_SET_ZERO_TURN":
-                result = self.COMM_SET_ZERO_TURN(uart, controller_id)
+            # if command == "COMM_SET_ZERO_TURN":
+            #     result = self.COMM_SET_ZERO_TURN(uart, controller_id)
         
             if command == "COMM_FW_VERSION":
                 result = self.COMM_FW_VERSION(uart, controller_id)
@@ -74,6 +89,23 @@ class Commands:
             print(traceback.format_exc())
             print()
             return None
+        
+    def COMM_SET_REMOTE_CONTROL(self, uart: UART, args: dict, controller_id: int = -1) -> None:
+        throttle = args["throttle"] * 100
+        board = args["board"] * 100
+        reverse_button = 0  # default: forward(0). Otherwise: backward(1)
+        if throttle < 0:
+            reverse_button = 1
+        
+        reverse_button_byte = uint8_to_bytes(reverse_button)
+        throttle_byte = uint32_to_bytes(throttle)
+        board_byte = uint32_to_bytes(board)
+        data = reverse_button_byte + throttle_byte + board_byte
+        print(data)
+
+        # uart.send_command(datatypes.COMM_Types.COMM_SET_ZERO_TURN, controller_id=controller_id, data=data)
+
+        return None
         
     def COMM_GET_VALUES(self, uart: UART, controller_id: int = -1) -> dict:
         uart.send_command(datatypes.COMM_Types.COMM_GET_VALUES, controller_id=controller_id)
