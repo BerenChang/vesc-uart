@@ -7,7 +7,7 @@ import datatypes
 from uart import UART
 from conv import *
 import RPi.GPIO as GPIO
-import XboxController
+from XboxController import XboxController
 
 # ZERO_TURN_SWITCH_PIN = 21
 # zero_turn_switch_before = GPIO.input(ZERO_TURN_SWITCH_PIN)
@@ -91,15 +91,16 @@ class Commands:
             return None
         
     def COMM_SET_REMOTE_CONTROL(self, uart: UART, args: dict, controller_id: int = -1) -> None:
-        throttle = args["throttle"] * 100
-        board = args["board"] * 100
+        throttle = args["throttle"]
+        board = args["board"]
         reverse_button = 0  # default: forward(0). Otherwise: backward(1)
         if throttle < 0:
             reverse_button = 1
+        throttle = abs(throttle)
         
         reverse_button_byte = uint8_to_bytes(reverse_button)
-        throttle_byte = uint32_to_bytes(throttle)
-        board_byte = uint32_to_bytes(board)
+        throttle_byte = uint32_to_bytes(throttle, 1e2)
+        board_byte = uint32_to_bytes(board, 1e2)
         data = reverse_button_byte + throttle_byte + board_byte
         print(data)
 
