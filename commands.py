@@ -99,8 +99,8 @@ class Commands:
         throttle = abs(throttle)
         
         reverse_button_byte = uint8_to_bytes(reverse_button)
-        throttle_byte = uint32_to_bytes(throttle, 1e2)
-        board_byte = uint32_to_bytes(board, 1e2)
+        throttle_byte = float32_to_bytes(throttle, 1e2)
+        board_byte = float32_to_bytes(board, 1e2)
         data = reverse_button_byte + throttle_byte + board_byte
         print(data)
 
