@@ -108,7 +108,7 @@ class Commands:
         board_byte = float32_to_bytes(board, 1e2)
         data = reverse_button_byte + steer_direction_byte + throttle_byte + board_byte
 
-        uart.send_command(datatypes.COMM_Types.COMM_SET_ZERO_TURN, controller_id=controller_id, data=data)
+        uart.send_command(datatypes.COMM_Types.COMM_SET_REMOTE_CONTROL, controller_id=controller_id, data=data)
 
         return None
         
