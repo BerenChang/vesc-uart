@@ -9,11 +9,16 @@ import urllib.parse
 import logic
 from network_packet import RequestPacket
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler, HTTPServer
+import uart
+import serial
 
 logic_obj = logic.Logic()
 
 class ApiServer:
     server: HTTPServer = None
+
+    # self.uart = uart.UART()
+    # self.uart.connect("port:///dev/ttyAMA0?speed=115200", 115200)
 
     class RequestHandler(BaseHTTPRequestHandler):
 
@@ -104,7 +109,31 @@ class ApiServer:
         def log_request(self, code: Union[int, str] = ..., size: Union[int, str] = ...) -> None:
             if logic_obj.uart is not None and logic_obj.uart.debug: super().log_request(code, size)
 
+    def read_serial(*args):
+        ser = serial.Serial('/dev/ttyAMA0', 115200, timeout=10)
+        while True:
+            data = ser.read(16)
+            data = [x for x in data]
+            print(f"Received: {data[:5]}")
+
+            if data[:5] is not [3,2,11,35,127]:
+                ser.read(1)
+                print(f"Aligning data: {data}")
+            else:
+                print(f"Aligned data: {data}")
+
+
+    def read_uart(*args):
+        while True:
+            data = self.uart.receive_packet(allow_incorrect_crc=False)
+            print(f"Received: {data}")
+
+
     def start_server(self, host, port, blocking = True):
+        # serial_thread = threading.Thread(target=self.uart.receive_packet(allow_incorrect_crc=False))
+        # serial_thread = threading.Thread(target=self.read_uart)
+        serial_thread = threading.Thread(target=self.read_serial)
+        serial_thread.start()
         if blocking:
             self.__internal_start_server(host, port)
         else:

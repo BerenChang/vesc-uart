@@ -22,7 +22,9 @@ class Commands:
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.ZERO_TURN_SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         self.zero_turn_switch_before = GPIO.input(self.ZERO_TURN_SWITCH_PIN)
-        self.joy = XboxController()
+        # self.rc_uart = UART(debug=False)
+        # self.rc_uart.connect("port:///dev/ttyAMA0?speed=115200", 115200)
+        # self.joy = XboxController()
 
     # noinspection PyTypeChecker
     def perform_command(self, uart: UART, command: str, controller_id: int = -1, args: dict = None) -> dict:
@@ -44,8 +46,17 @@ class Commands:
                     self.zero_turn_switch_before = zero_turn_switch_after
 
                 # Joystick RC
-                [throttle, board] = self.joy.read()
-                self.COMM_SET_REMOTE_CONTROL(uart, {"throttle": throttle, "board": board}, controller_id)
+                # [throttle, board] = self.joy.read()
+                # print([throttle, board])
+                # rc_command, drop_buffers = self.rc_uart.receive_packet_rc(allow_incorrect_crc=True)
+                # if (not drop_buffers):
+                #     rc_command_int = [x for x in rc_command.data]
+                #     print(rc_command_int)
+                #     throttle = max(-1, min((rc_command_int[1]-128)/255, 1))
+                #     print(throttle)
+                #     if abs(throttle) > 0.1:
+                #         board = 0
+                        # self.COMM_SET_REMOTE_CONTROL(uart, {"throttle": throttle, "board": board}, controller_id)
 
                 result = self.COMM_GET_VALUES(uart, controller_id)
 

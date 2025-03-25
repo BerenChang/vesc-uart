@@ -19,7 +19,7 @@ class UART:
 
     last_error: Exception = None
     debug = False
-    rcv_timeout_ms: int = 100
+    rcv_timeout_ms: int = 1
     need_drop_buffers: bool = False
 
     multithread_lock: Lock
@@ -101,3 +101,33 @@ class UART:
             if self.debug: print("UART:RCV (h)", packet.full.hex())
             if self.debug: print("UART:RCV (b)", packet.full)
             return packet
+
+
+    def receive_packet_rc(self, timeout_ms: int = rcv_timeout_ms, allow_incorrect_crc: bool = False) -> uart_packet.UART_Packet:
+        with self.multithread_lock:
+            rcvd = bytearray()
+
+            started_op_time_ms = int(time.time() * 1000)
+            long_packet = False
+
+            if self.interface.type == self.interface.T_TCP:
+                timeout_ms += 300
+
+            while len(rcvd) < 16:
+                rcvd += self.interface.receive()
+
+                op_time_ms = int(time.time() * 1000) - started_op_time_ms
+                if op_time_ms > 10:
+                    self.need_drop_buffers = True
+                    break
+                    # raise Exception("Timeout receive packet")
+
+            packet = uart_packet.UART_Packet()
+            if self.need_drop_buffers:
+                return packet, self.need_drop_buffers
+            else:
+                packet.long_packet = long_packet
+                packet.parse(bytes(rcvd), allow_incorrect_crc)
+                if self.debug: print("UART:RCV (h)", packet.full.hex())
+                if self.debug: print("UART:RCV (b)", packet.full)
+                return packet, self.need_drop_buffers
